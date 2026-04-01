@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@import "konsta/react/theme.css";
+
+:root {
+  --color-primary: #FF6600;
+  --color-primary-light: #FFF2E6;
+  --color-green: #1EA650;
+  --color-red: #FF3B30;
+  --color-discount: #FF6600;
+  --color-bg: #F2F2F7;
+  --color-surface: #FFFFFF;
+  --color-text: #1C1C1E;
+  --color-text-secondary: #8E8E93;
+  --color-text-tertiary: #C7C7CC;
+  --color-border: #E5E5EA;
+}
+
+html, body {
+  margin: 0;
+  background: var(--color-bg);
+  overflow: hidden;
+  height: 100%;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@supports (-webkit-touch-callout: none) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
