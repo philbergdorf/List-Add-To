@@ -348,7 +348,7 @@ function AddProductPage({ onBack, quantities, onAdd, onIncrement, onRemove }: {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
   const [activeSection, setActiveSection] = useState<string | null>(null)
   const [promoFilter] = useState(false)
-  const [viewMode, setViewMode] = useState<'list' | 'card'>('list')
+  const [viewMode, setViewMode] = useState<'list' | 'card'>('card')
   const scrollRef = useRef<HTMLDivElement>(null)
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const chipBarRef = useRef<HTMLDivElement>(null)
