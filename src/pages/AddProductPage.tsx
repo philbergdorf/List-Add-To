@@ -415,7 +415,7 @@ function AddProductPage({ onBack, quantities, onAdd, onIncrement, onRemove }: {
             className="absolute -left-2 flex items-center text-[var(--color-primary)] text-[17px]"
           >
             <ChevronLeft size={28} strokeWidth={2.5} />
-            <span>back</span>
+            <span>Zurück</span>
           </button>
           <h1 className="text-[17px] font-semibold text-[var(--color-text)]">Add product</h1>
           <button
