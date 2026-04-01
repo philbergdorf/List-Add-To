@@ -167,13 +167,6 @@ function SwissFlagIcon() {
   )
 }
 
-function KosherIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <text x="2" y="13" fontSize="13" fontFamily="serif" fill="var(--color-text-secondary)">&#x2638;</text>
-    </svg>
-  )
-}
 
 function TagBadge({ tag }: { tag: string }) {
   if (tag === 'CH') return <SwissFlagIcon />
@@ -354,7 +347,7 @@ function AddProductPage({ onBack, quantities, onAdd, onIncrement, onRemove }: {
 }) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
   const [activeSection, setActiveSection] = useState<string | null>(null)
-  const [promoFilter, setPromoFilter] = useState(false)
+  const [promoFilter] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'card'>('list')
   const scrollRef = useRef<HTMLDivElement>(null)
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})

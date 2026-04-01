@@ -4,7 +4,7 @@ import HomePage from '@/pages/HomePage'
 import ListsPage from '@/pages/ListsPage'
 import AddProductPage from '@/pages/AddProductPage'
 import type { PageName } from '@/lib/types'
-import { Percent, Barcode, ClipboardList, User, Share2, EllipsisVertical } from 'lucide-react'
+import { Percent, Barcode, ClipboardList, Share2, EllipsisVertical } from 'lucide-react'
 
 function MigrosIcon() {
   return (

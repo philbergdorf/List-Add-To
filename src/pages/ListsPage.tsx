@@ -6,7 +6,7 @@ import type { Product } from '@/lib/types'
 // Preserve category order from AddProductPage
 const sectionOrder = ['Vorräte & Haushalt', ...categorySections.map((s) => s.title)]
 
-function ListsPage({ onAddProduct, quantities, onIncrement, onRemove }: {
+function ListsPage({ onAddProduct, quantities }: {
   onAddProduct: () => void
   quantities: Record<string, number>
   onIncrement: (id: string) => void
