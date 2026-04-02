@@ -4,7 +4,7 @@ import HomePage from '@/pages/HomePage'
 import ListsPage from '@/pages/ListsPage'
 import AddProductPage from '@/pages/AddProductPage'
 import type { PageName } from '@/lib/types'
-import { Percent, Barcode, ClipboardList, Share2, EllipsisVertical } from 'lucide-react'
+import { Percent, Barcode, ClipboardList, EllipsisVertical } from 'lucide-react'
 
 function MigrosIcon() {
   return (
@@ -46,14 +46,9 @@ function Header({ title }: { title: string }) {
     <header className="bg-white border-b border-[var(--color-border)] px-4 pt-[env(safe-area-inset-top)]">
       <div className="h-11 flex items-center justify-between">
         <h1 className="text-[22px] font-bold text-[var(--color-text)]">{title}</h1>
-        <div className="flex items-center gap-3">
-          <button className="text-[var(--color-text-secondary)]">
-            <Share2 size={22} />
-          </button>
-          <button className="text-[var(--color-text-secondary)]">
-            <EllipsisVertical size={22} />
-          </button>
-        </div>
+        <button className="text-[var(--color-text-secondary)]">
+          <EllipsisVertical size={22} />
+        </button>
       </div>
     </header>
   )

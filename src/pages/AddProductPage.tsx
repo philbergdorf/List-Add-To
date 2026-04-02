@@ -180,6 +180,43 @@ function TagBadge({ tag }: { tag: string }) {
 }
 
 
+function QuantityControls({ quantity, onAdd, onIncrement, onRemove }: {
+  quantity: number
+  onAdd: () => void
+  onIncrement: () => void
+  onRemove: () => void
+}) {
+  if (quantity === 0) {
+    return (
+      <button
+        onClick={onAdd}
+        className="w-8 h-8 bg-[var(--color-primary)] rounded-md flex items-center justify-center"
+      >
+        <ListPlus size={16} color="white" />
+      </button>
+    )
+  }
+  return (
+    <div className="flex flex-col items-center gap-0.5">
+      <button
+        onClick={onIncrement}
+        className="w-8 h-8 bg-[var(--color-green)] rounded-md flex items-center justify-center"
+      >
+        <PlusIcon />
+      </button>
+      <span className="text-[13px] font-bold text-[var(--color-text)] text-center">
+        {quantity}
+      </span>
+      <button
+        onClick={onRemove}
+        className="w-8 h-8 rounded-md flex items-center justify-center border border-[var(--color-border)]"
+      >
+        {quantity > 1 ? <MinusIcon /> : <TrashIcon />}
+      </button>
+    </div>
+  )
+}
+
 function ProductRow({ product, quantity, onAdd, onIncrement, onRemove }: {
   product: Product
   quantity: number
@@ -188,7 +225,7 @@ function ProductRow({ product, quantity, onAdd, onIncrement, onRemove }: {
   onRemove: () => void
 }) {
   return (
-    <div className="flex items-center px-4 py-3">
+    <div className="flex items-start px-4 py-3">
       <ProductImage src={product.imageUrl} />
 
       <div className="flex-1 ml-3 min-w-0">
@@ -223,32 +260,7 @@ function ProductRow({ product, quantity, onAdd, onIncrement, onRemove }: {
       </div>
 
       <div className="flex-shrink-0 ml-2">
-        {quantity === 0 ? (
-          <button
-            onClick={onAdd}
-            className="w-10 h-10 bg-[var(--color-primary)] rounded-lg flex items-center justify-center"
-          >
-            <ListPlus size={20} color="white" />
-          </button>
-        ) : (
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={onRemove}
-              className="w-10 h-10 rounded-lg flex items-center justify-center border border-[var(--color-border)]"
-            >
-              {quantity > 1 ? <MinusIcon /> : <TrashIcon />}
-            </button>
-            <span className="text-[17px] font-bold text-[var(--color-text)] w-6 text-center">
-              {quantity}
-            </span>
-            <button
-              onClick={onIncrement}
-              className="w-10 h-10 bg-[var(--color-green)] rounded-lg flex items-center justify-center"
-            >
-              <PlusIcon />
-            </button>
-          </div>
-        )}
+        <QuantityControls quantity={quantity} onAdd={onAdd} onIncrement={onIncrement} onRemove={onRemove} />
       </div>
     </div>
   )
@@ -271,7 +283,7 @@ function ProductCard({ product, quantity, onAdd, onIncrement, onRemove }: {
         )}
       </div>
 
-      <div className="flex-1 flex items-center p-3 min-w-0">
+      <div className="flex-1 flex items-start p-3 min-w-0">
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 whitespace-nowrap">
             {product.discountPercent != null && (
@@ -304,32 +316,7 @@ function ProductCard({ product, quantity, onAdd, onIncrement, onRemove }: {
         </div>
 
         <div className="flex-shrink-0 ml-2">
-          {quantity === 0 ? (
-            <button
-              onClick={onAdd}
-              className="w-10 h-10 bg-[var(--color-primary)] rounded-lg flex items-center justify-center"
-            >
-              <ListPlus size={20} color="white" />
-            </button>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={onRemove}
-                className="w-10 h-10 rounded-lg flex items-center justify-center border border-[var(--color-border)]"
-              >
-                {quantity > 1 ? <MinusIcon /> : <TrashIcon />}
-              </button>
-              <span className="text-[17px] font-bold text-[var(--color-text)] w-6 text-center">
-                {quantity}
-              </span>
-              <button
-                onClick={onIncrement}
-                className="w-10 h-10 bg-[var(--color-green)] rounded-lg flex items-center justify-center"
-              >
-                <PlusIcon />
-              </button>
-            </div>
-          )}
+          <QuantityControls quantity={quantity} onAdd={onAdd} onIncrement={onIncrement} onRemove={onRemove} />
         </div>
       </div>
     </div>

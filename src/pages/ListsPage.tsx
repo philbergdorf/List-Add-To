@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ShoppingBasket, Plus, Circle, CircleCheckBig, ChevronDown, ChevronUp } from 'lucide-react'
+import { ShoppingBasket, Plus, Circle, CircleCheckBig, ChevronDown, ChevronUp, Share } from 'lucide-react'
 import { allProducts, productSectionMap, sectionIconMap, categorySections } from '@/pages/AddProductPage'
 import type { Product } from '@/lib/types'
 
@@ -75,8 +75,32 @@ function ListsPage({ onAddProduct, quantities }: {
     )
   }
 
+  const shareList = async () => {
+    const lines = entries.map(([id, qty]) => {
+      const p = allProducts.get(id)
+      if (!p) return ''
+      return `${qty > 1 ? qty + 'x ' : ''}${p.name} (${p.unit})`
+    }).filter(Boolean)
+    const text = `Einkaufsliste:\n${lines.join('\n')}`
+    if (navigator.share) {
+      await navigator.share({ title: 'Einkaufsliste', text })
+    } else {
+      await navigator.clipboard.writeText(text)
+      alert('Liste in Zwischenablage kopiert!')
+    }
+  }
+
   return (
     <div className="flex-1 flex flex-col bg-[var(--color-bg)]">
+      <div className="flex justify-end px-4 pt-3 pb-1">
+        <button
+          onClick={shareList}
+          className="flex items-center gap-1.5 px-4 py-2 bg-white rounded-full shadow-[0_1px_4px_rgba(0,0,0,0.06)] border border-[var(--color-border)] text-[var(--color-primary)] text-[13px] font-medium active:bg-[var(--color-primary-light)] transition-colors"
+        >
+          <Share size={15} strokeWidth={2} />
+          Liste teilen
+        </button>
+      </div>
       <div className="flex-1 overflow-y-auto pb-24">
         {uncheckedSections.map(([section, items]) => {
           const SectionIcon = sectionIconMap.get(section)
