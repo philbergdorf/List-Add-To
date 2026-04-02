@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, type ComponentType } from 'react'
 import type { Product } from '@/lib/types'
-import { Heart, Tag, Apple, Wheat, Milk, CupSoda, ListPlus, ScanBarcode, ChevronLeft, LayoutList, LayoutGrid, type LucideProps } from 'lucide-react'
+import { Heart, Tag, Apple, Wheat, Milk, CupSoda, ListPlus, ScanBarcode, ChevronLeft, ChevronDown, LayoutList, LayoutGrid, type LucideProps } from 'lucide-react'
 
 type Section = { title: string; icon: ComponentType<LucideProps>; count: number; products: Product[] }
 
@@ -225,10 +225,16 @@ function ProductRow({ product, quantity, onAdd, onIncrement, onRemove }: {
   onRemove: () => void
 }) {
   return (
-    <div className="flex items-start px-4 py-3">
-      <ProductImage src={product.imageUrl} />
+    <div className="flex items-stretch h-[110px]">
+      <div className="w-[110px] flex-shrink-0 bg-[#FAFAFA] flex items-center justify-center">
+        {product.imageUrl ? (
+          <img src={product.imageUrl} alt="" className="w-20 h-20 object-contain" />
+        ) : (
+          <div className="w-20 h-20 bg-[#E5E5EA] rounded-lg" />
+        )}
+      </div>
 
-      <div className="flex-1 ml-3 min-w-0">
+      <div className="flex-1 py-3 pl-3 min-w-0">
         <div className="flex items-baseline gap-2 whitespace-nowrap">
           {product.discountPercent != null && (
             <span className="bg-[var(--color-discount)] text-white text-[11px] font-bold px-1.5 py-0.5 rounded">
@@ -259,7 +265,7 @@ function ProductRow({ product, quantity, onAdd, onIncrement, onRemove }: {
         </div>
       </div>
 
-      <div className="flex-shrink-0 ml-2">
+      <div className="flex-shrink-0 ml-2 pr-3 pt-3 pb-3">
         <QuantityControls quantity={quantity} onAdd={onAdd} onIncrement={onIncrement} onRemove={onRemove} />
       </div>
     </div>
@@ -457,9 +463,17 @@ function AddProductPage({ onBack, quantities, onAdd, onIncrement, onRemove }: {
 
           return (
             <div key={section.title} ref={(el) => { sectionRefs.current[section.title] = el }}>
-              {i > 0 && viewMode === 'list' && <div className="border-t border-[var(--color-border)]" />}
-              <div className="pt-4">
-                <h2 className="text-[17px] font-bold text-[var(--color-text)] px-4 mb-1 flex items-center gap-1.5"><section.icon size={18} /> {section.title}</h2>
+              {viewMode === 'list' ? (
+                <div className="bg-[var(--color-bg)] py-2.5 px-4 flex items-center gap-1.5">
+                  <section.icon size={14} className="text-[var(--color-text)]" />
+                  <h2 className="text-[13px] font-bold text-[var(--color-text)] uppercase tracking-wide">{section.title}</h2>
+                </div>
+              ) : (
+                <div className="pt-4">
+                  <h2 className="text-[17px] font-bold text-[var(--color-text)] px-4 mb-1 flex items-center gap-1.5"><section.icon size={18} /> {section.title}</h2>
+                </div>
+              )}
+              <div>
                 {viewMode === 'list' ? (
                   <div className="divide-y divide-[var(--color-border)]">
                     {visibleProducts.map((product) => (
@@ -488,14 +502,26 @@ function AddProductPage({ onBack, quantities, onAdd, onIncrement, onRemove }: {
                   </div>
                 )}
                 {!isExpanded && hiddenCount > 0 && (
-                  <div className="px-4 py-3">
-                    <button
-                      onClick={() => setExpandedSections((prev) => ({ ...prev, [section.title]: true }))}
-                      className="w-full h-11 rounded-full border-2 border-[var(--color-primary)] text-[var(--color-primary)] text-[14px] font-semibold"
-                    >
-                      Alle anzeigen (+{hiddenCount})
-                    </button>
-                  </div>
+                  viewMode === 'list' ? (
+                    <>
+                      <div className="border-t border-[var(--color-border)]" />
+                      <button
+                        onClick={() => setExpandedSections((prev) => ({ ...prev, [section.title]: true }))}
+                        className="flex items-center justify-center gap-1 w-full px-4 py-2.5 text-[var(--color-primary)] text-[13px] font-bold"
+                      >
+                        Alle anzeigen (+{hiddenCount})
+                      </button>
+                    </>
+                  ) : (
+                    <div className="px-4 py-3">
+                      <button
+                        onClick={() => setExpandedSections((prev) => ({ ...prev, [section.title]: true }))}
+                        className="w-full h-11 rounded-full border-2 border-[var(--color-primary)] text-[var(--color-primary)] text-[14px] font-semibold"
+                      >
+                        Alle anzeigen (+{hiddenCount})
+                      </button>
+                    </div>
+                  )
                 )}
               </div>
             </div>
