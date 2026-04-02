@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, type ComponentType } from 'react'
 import type { Product } from '@/lib/types'
-import { Heart, Tag, Apple, Wheat, Milk, CupSoda, ListPlus, ScanBarcode, ChevronLeft, ChevronDown, LayoutList, LayoutGrid, type LucideProps } from 'lucide-react'
+import { Heart, Tag, Apple, Wheat, Milk, CupSoda, ListPlus, ScanBarcode, ChevronLeft, LayoutList, LayoutGrid, type LucideProps } from 'lucide-react'
 
 type Section = { title: string; icon: ComponentType<LucideProps>; count: number; products: Product[] }
 
@@ -111,24 +111,6 @@ for (const section of categorySections) {
   }
 }
 
-function ProductImage({ src }: { src: string }) {
-  if (!src) {
-    return (
-      <div className="w-20 h-20 flex-shrink-0 bg-[#E5E5EA] rounded-lg relative overflow-hidden">
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 80 80">
-          <line x1="0" y1="0" x2="80" y2="80" stroke="#C7C7CC" strokeWidth="1" />
-          <line x1="80" y1="0" x2="0" y2="80" stroke="#C7C7CC" strokeWidth="1" />
-          <rect x="0" y="0" width="80" height="80" fill="none" stroke="#C7C7CC" strokeWidth="1" />
-        </svg>
-      </div>
-    )
-  }
-  return (
-    <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-[#FAFAFA]">
-      <img src={src} alt="" className="w-full h-full object-contain" />
-    </div>
-  )
-}
 
 
 function TrashIcon() {
@@ -456,7 +438,7 @@ function AddProductPage({ onBack, quantities, onAdd, onIncrement, onRemove }: {
 
       {/* Scrollable content */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto pb-20">
-        {filteredSections.map((section, i) => {
+        {filteredSections.map((section) => {
           const isExpanded = expandedSections[section.title] || false
           const visibleProducts = isExpanded ? section.products : section.products.slice(0, COLLAPSED_COUNT)
           const hiddenCount = section.products.length - COLLAPSED_COUNT
