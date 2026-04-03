@@ -385,7 +385,7 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFu
       </div>
 
       {/* Add products button */}
-      {hasAnyItems && <div className="fixed bottom-14 left-0 right-0 flex justify-center z-40 pointer-events-none">
+      {hasAnyItems && <div className="fixed left-0 right-0 flex justify-center z-40 pointer-events-none" style={{ bottom: 'calc(50px + env(safe-area-inset-bottom) + 8px)' }}>
         <div className="max-w-[428px] w-full flex justify-center px-4 mb-3 pointer-events-none">
           <button
             onClick={onAddProduct}
