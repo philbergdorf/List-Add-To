@@ -4,7 +4,7 @@ import HomePage from '@/pages/HomePage'
 import ListsPage from '@/pages/ListsPage'
 import AddProductPage from '@/pages/AddProductPage'
 import type { PageName, ShoppingList } from '@/lib/types'
-import { Percent, Barcode, ClipboardList, EllipsisVertical, Plus, Pencil, Trash2, Store, Truck } from 'lucide-react'
+import { Percent, Barcode, ClipboardList, ShoppingCart, EllipsisVertical, Plus, Pencil, Trash2, Store, Truck } from 'lucide-react'
 
 function MigrosIcon() {
   return (
@@ -134,7 +134,18 @@ function Header({ title, onMenuAction, showShoppingToggle, canEditList = true, s
   )
 }
 
-function TabBar({ activeTab, onTabChange, itemCount }: { activeTab: PageName; onTabChange: (tab: PageName) => void; itemCount: number }) {
+function CartBadgeIcon({ count }: { count?: number }) {
+  return (
+    <div className="relative">
+      <ShoppingCart size={24} />
+      {(count ?? 0) > 0 && (
+        <span className="absolute -top-1.5 -right-2.5 bg-[var(--color-primary)] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">{count}</span>
+      )}
+    </div>
+  )
+}
+
+function TabBar({ activeTab, onTabChange, itemCount, shoppingMode }: { activeTab: PageName; onTabChange: (tab: PageName) => void; itemCount: number; shoppingMode: 'laden' | 'online' }) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50">
       <div className="max-w-[428px] mx-auto bg-white/80 backdrop-blur-md border-t border-[var(--color-border)] flex pb-[env(safe-area-inset-bottom)]">
@@ -146,8 +157,10 @@ function TabBar({ activeTab, onTabChange, itemCount }: { activeTab: PageName; on
               onClick={() => onTabChange(tab.id)}
               className={`flex-1 flex flex-col items-center pt-2 pb-1 ${isActive ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-secondary)]'}`}
             >
-              {tab.id === 'liste' ? <ListeBadgeIcon count={itemCount} /> : tab.icon ? <tab.icon /> : null}
-              <span className="text-[10px] mt-1">{tab.label}</span>
+              {tab.id === 'liste'
+                ? (shoppingMode === 'online' ? <CartBadgeIcon count={itemCount} /> : <ListeBadgeIcon count={itemCount} />)
+                : tab.icon ? <tab.icon /> : null}
+              <span className="text-[10px] mt-1">{tab.id === 'liste' && shoppingMode === 'online' ? 'Warenkorb' : tab.label}</span>
             </button>
           )
         })}
@@ -239,6 +252,13 @@ function ListAddToApp() {
   const incrementProduct = (id: string) => {
     updateActiveQuantities((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }))
   }
+  const removeProductFully = (id: string) => {
+    updateActiveQuantities((prev) => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
+  }
   const removeProduct = (id: string) => {
     updateActiveQuantities((prev) => {
       const next = { ...prev }
@@ -281,7 +301,7 @@ function ListAddToApp() {
 
   const itemCount = Object.keys(activeList.quantities).length
   const headerTitle = currentPage === 'liste' ? activeList.name : (
-    { home: 'Home', angebote: 'Angebote', cumulus: 'Cumulus', subitogo: 'subitoGo', 'add-product': 'Add product' } as Record<string, string>
+    { home: 'Home', angebote: 'Angebote', cumulus: 'Cumulus', subitogo: 'subitoGo', 'add-product': 'Produkte hinzufügen' } as Record<string, string>
   )[currentPage] || ''
 
   return (
@@ -305,6 +325,7 @@ function ListAddToApp() {
                 quantities={activeList.quantities}
                 onIncrement={incrementProduct}
                 onRemove={removeProduct}
+                onRemoveFully={removeProductFully}
                 lists={lists}
                 activeListId={activeListId}
                 displayListName={displayListName}
@@ -320,7 +341,7 @@ function ListAddToApp() {
             )}
           </>
         )}
-        <TabBar activeTab={currentPage} onTabChange={setCurrentPage} itemCount={itemCount} />
+        <TabBar activeTab={currentPage} onTabChange={setCurrentPage} itemCount={itemCount} shoppingMode={shoppingMode} />
       </div>
 
       {nameSheet && (

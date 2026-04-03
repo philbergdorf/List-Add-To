@@ -392,7 +392,7 @@ function AddProductPage({ onBack, quantities, onAdd, onIncrement, onRemove }: {
             <ChevronLeft size={28} strokeWidth={2.5} />
             <span>Zurück</span>
           </button>
-          <h1 className="text-[17px] font-semibold text-[var(--color-text)]">Add product</h1>
+          <h1 className="text-[17px] font-semibold text-[var(--color-text)]">Produkte hinzufügen</h1>
           <button
             onClick={() => setViewMode((v) => v === 'list' ? 'card' : 'list')}
             className="absolute right-0 text-[var(--color-text-secondary)]"

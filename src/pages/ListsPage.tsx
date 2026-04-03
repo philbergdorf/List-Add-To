@@ -1,15 +1,16 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
-import { ShoppingBasket, Plus, Circle, CircleCheckBig, ChevronDown, ChevronUp, ChevronRight, EllipsisVertical, UserPlus, Minus, Trash, Check } from 'lucide-react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
+import { ShoppingBasket, ShoppingBag, Plus, Circle, CircleCheckBig, ChevronDown, ChevronUp, ChevronRight, EllipsisVertical, UserPlus, Minus, Trash, Check } from 'lucide-react'
 import { allProducts, productSectionMap, sectionIconMap, categorySections } from '@/pages/AddProductPage'
 import type { Product, ShoppingList } from '@/lib/types'
 
 const sectionOrder = ['Vorräte & Haushalt', ...categorySections.map((s) => s.title)]
 
-function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, lists, activeListId, onSwitchList, displayListName }: {
+function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFully, lists, activeListId, onSwitchList, displayListName }: {
   onAddProduct: () => void
   quantities: Record<string, number>
   onIncrement: (id: string) => void
   onRemove: (id: string) => void
+  onRemoveFully: (id: string) => void
   lists: ShoppingList[]
   activeListId: string
   onSwitchList: (id: string) => void
@@ -17,6 +18,7 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, lists, act
 }) {
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [pending, setPending] = useState<Set<string>>(new Set())
+  const [checkedSnapshot, setCheckedSnapshot] = useState<Record<string, { qty: number; product: Product }>>({})
   const [showErledigt, setShowErledigt] = useState(false)
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
@@ -25,6 +27,10 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, lists, act
   const moveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastScrollTop = useRef(0)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const quantitiesRef = useRef(quantities)
+  quantitiesRef.current = quantities
+  const onRemoveFullyRef = useRef(onRemoveFully)
+  onRemoveFullyRef.current = onRemoveFully
 
   useEffect(() => {
     const el = scrollRef.current
@@ -42,11 +48,27 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, lists, act
   const flushPending = useCallback(() => {
     setPending((p) => {
       if (p.size === 0) return p
+      const ids = [...p]
+      // Move to checked
       setChecked((prev) => {
         const next = new Set(prev)
-        for (const id of p) next.add(id)
+        for (const id of ids) next.add(id)
         return next
       })
+      // Snapshot product data and remove from quantities using refs (always fresh)
+      for (const id of ids) {
+        const product = allProducts.get(id)
+        const qty = quantitiesRef.current[id] || 1
+        if (product) {
+          setCheckedSnapshot((prev) => ({ ...prev, [id]: { qty, product } }))
+        }
+      }
+      // Remove fully from quantities (one call per item, no looping)
+      setTimeout(() => {
+        for (const id of ids) {
+          onRemoveFullyRef.current(id)
+        }
+      }, 0)
       return new Set()
     })
   }, [])
@@ -55,6 +77,17 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, lists, act
     navigator.vibrate?.(10)
     // Unchecking: move back immediately
     if (checked.has(id)) {
+      // Uncheck: restore to quantities from snapshot
+      const snap = checkedSnapshot[id]
+      if (snap) {
+        onIncrement(id) // adds with qty 1
+        for (let i = 1; i < snap.qty; i++) onIncrement(id)
+        setCheckedSnapshot((prev) => {
+          const next = { ...prev }
+          delete next[id]
+          return next
+        })
+      }
       setChecked((prev) => {
         const next = new Set(prev)
         next.delete(id)
@@ -79,20 +112,24 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, lists, act
   }
 
   const removeItem = (id: string) => {
-    onRemove(id)
+    // Remove from quantities if still there
+    if (quantities[id]) onRemoveFully(id)
     setChecked((prev) => {
       const next = new Set(prev)
       next.delete(id)
+      return next
+    })
+    setCheckedSnapshot((prev) => {
+      const next = { ...prev }
+      delete next[id]
       return next
     })
     setSelectedItemId(null)
   }
 
   const clearChecked = () => {
-    for (const id of checked) {
-      onRemove(id)
-    }
     setChecked(new Set())
+    setCheckedSnapshot({})
   }
 
   const entries = Object.entries(quantities)
@@ -119,15 +156,29 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, lists, act
   )
 
   const uncheckedSections: [string, { id: string; qty: number; product: Product }[]][] = []
-  const checkedItems: { id: string; qty: number; product: Product }[] = []
 
   for (const [section, items] of sortedSections) {
-    // Pending items stay in their section (visually checked but not moved yet)
     const unchecked = items.filter((i) => !checked.has(i.id))
-    const checkedInSection = items.filter((i) => checked.has(i.id) && !pending.has(i.id))
     if (unchecked.length > 0) uncheckedSections.push([section, unchecked])
-    checkedItems.push(...checkedInSection)
   }
+
+  // Build checked items from snapshot (since they're removed from quantities)
+  const checkedItems = Object.entries(checkedSnapshot).map(([id, { qty, product }]) => ({ id, qty, product }))
+
+  const hasAnyItems = hasItems || checkedItems.length > 0
+  const allDone = hasAnyItems && uncheckedSections.length === 0 && pending.size === 0
+
+  const celebrationMessages = [
+    'Geniess den Rest des Tages.',
+    'Gut gemacht. Zeit zum Entspannen.',
+    'Fertig eingekauft. Ab nach Hause!',
+    'Alles erledigt. Schönen Feierabend!',
+  ]
+  const celebrationMessage = useMemo(
+    () => celebrationMessages[Math.floor(Math.random() * celebrationMessages.length)],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allDone]
+  )
 
   const shareList = async () => {
     const activeListName = lists.find((l) => l.id === activeListId)?.name || 'Einkaufsliste'
@@ -199,7 +250,7 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, lists, act
           </button>
         </div>
 
-        {!hasItems ? (
+        {!hasItems && checkedItems.length === 0 ? (
           <div className="flex flex-col items-center px-8 pt-[20vh]">
             <div className="w-24 h-24 bg-[#FFF2E6] rounded-3xl flex items-center justify-center mb-6">
               <ShoppingBasket size={44} color="var(--color-primary)" strokeWidth={1.5} />
@@ -217,6 +268,18 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, lists, act
               <Plus size={20} strokeWidth={2.5} />
               Produkt hinzufügen
             </button>
+          </div>
+        ) : allDone ? (
+          <div className="flex flex-col items-center px-8 pt-[12vh]">
+            <div className="w-24 h-24 bg-[#E8F5E9] rounded-full flex items-center justify-center mb-5 animate-[springBounce_0.5s_ease-out]">
+              <CircleCheckBig size={52} color="var(--color-green)" strokeWidth={1.5} />
+            </div>
+            <h2 className="text-[20px] font-bold text-[var(--color-text)] text-center">
+              Alles erledigt!
+            </h2>
+            <p className="text-[14px] text-[var(--color-text-secondary)] text-center mt-2 leading-relaxed max-w-[260px]">
+              {celebrationMessage}
+            </p>
           </div>
         ) : (
         <>
@@ -246,6 +309,9 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, lists, act
             </div>
           )
         })}
+
+        </>
+        )}
 
         {checkedItems.length > 0 && (
           <div className="mt-4 mx-4">
@@ -286,17 +352,17 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, lists, act
             </div>
           </div>
         )}
-        {/* Total price */}
-        <div className="mx-4 mt-4 mb-24 flex items-center justify-between bg-white rounded-xl px-4 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)] border border-[var(--color-border)]">
-          <span className="text-[14px] font-medium text-[var(--color-text-secondary)]">Gesamt</span>
-          <span className="text-[18px] font-bold text-[var(--color-text)]">CHF {totalPrice.toFixed(2)}</span>
-        </div>
-        </>
+
+        {hasItems && !allDone && (
+          <div className="mx-4 mt-4 mb-24 flex items-center justify-between bg-white rounded-xl px-4 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)] border border-[var(--color-border)]">
+            <span className="text-[14px] font-medium text-[var(--color-text-secondary)]">Gesamt</span>
+            <span className="text-[18px] font-bold text-[var(--color-text)]">CHF {totalPrice.toFixed(2)}</span>
+          </div>
         )}
       </div>
 
       {/* Add products button */}
-      {hasItems && <div className="fixed bottom-20 left-0 right-0 flex justify-center z-40 pointer-events-none">
+      {hasAnyItems && <div className="fixed bottom-20 left-0 right-0 flex justify-center z-40 pointer-events-none">
         <div className="max-w-[428px] w-full flex justify-center px-4 mb-3 pointer-events-none">
           <button
             onClick={onAddProduct}
