@@ -270,7 +270,7 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, lists, act
                   </button>
                 )}
               </div>
-              {showErledigt && checkedItems.map((item, i) => (
+              {showErledigt && checkedItems.map((item) => (
                 <div key={item.id}>
                   <div className="border-t border-[var(--color-border)] ml-14" />
                   <ShoppingListItem
