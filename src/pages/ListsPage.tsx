@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
-import { ShoppingBasket, ShoppingBag, Plus, Circle, CircleCheckBig, ChevronDown, ChevronUp, ChevronRight, EllipsisVertical, UserPlus, Minus, Trash, Check } from 'lucide-react'
+import { ShoppingBasket, Plus, Circle, CircleCheckBig, ChevronDown, ChevronUp, ChevronRight, EllipsisVertical, UserPlus, Minus, Trash, Check } from 'lucide-react'
 import { allProducts, productSectionMap, sectionIconMap, categorySections } from '@/pages/AddProductPage'
 import type { Product, ShoppingList } from '@/lib/types'
 
