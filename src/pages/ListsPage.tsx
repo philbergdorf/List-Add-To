@@ -3,7 +3,7 @@ import { ShoppingBasket, Plus, Circle, CircleCheckBig, ChevronDown, ChevronUp, C
 import { allProducts, productSectionMap, sectionIconMap, categorySections } from '@/pages/AddProductPage'
 import type { Product, ShoppingList } from '@/lib/types'
 
-const sectionOrder = ['Vorräte & Haushalt', ...categorySections.map((s) => s.title)]
+const sectionOrder = categorySections.map((s) => s.title)
 
 function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFully, lists, activeListId, onSwitchList, displayListName }: {
   onAddProduct: () => void
@@ -18,6 +18,7 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFu
 }) {
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [pending, setPending] = useState<Set<string>>(new Set())
+  const [pendingUncheck, setPendingUncheck] = useState<Set<string>>(new Set())
   const [checkedSnapshot, setCheckedSnapshot] = useState<Record<string, { qty: number; product: Product }>>({})
   const [showErledigt, setShowErledigt] = useState(false)
   const [notes, setNotes] = useState<Record<string, string>>({})
@@ -25,6 +26,7 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFu
   const [collapsed, setCollapsed] = useState(false)
   const [listPickerOpen, setListPickerOpen] = useState(false)
   const moveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const uncheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastScrollTop = useRef(0)
   const scrollRef = useRef<HTMLDivElement>(null)
   const quantitiesRef = useRef(quantities)
@@ -73,26 +75,47 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFu
     })
   }, [])
 
-  const toggleCheck = (id: string) => {
-    navigator.vibrate?.(10)
-    // Unchecking: move back immediately
-    if (checked.has(id)) {
-      // Uncheck: restore to quantities from snapshot
-      const snap = checkedSnapshot[id]
-      if (snap) {
-        onIncrement(id) // adds with qty 1
-        for (let i = 1; i < snap.qty; i++) onIncrement(id)
-        setCheckedSnapshot((prev) => {
-          const next = { ...prev }
-          delete next[id]
-          return next
-        })
+  const flushPendingUncheck = useCallback(() => {
+    setPendingUncheck((p) => {
+      if (p.size === 0) return p
+      const ids = [...p]
+      for (const id of ids) {
+        const snap = checkedSnapshot[id]
+        if (snap) {
+          onIncrement(id)
+          for (let i = 1; i < snap.qty; i++) onIncrement(id)
+        }
       }
       setChecked((prev) => {
         const next = new Set(prev)
-        next.delete(id)
+        for (const id of ids) next.delete(id)
         return next
       })
+      setCheckedSnapshot((prev) => {
+        const next = { ...prev }
+        for (const id of ids) delete next[id]
+        return next
+      })
+      return new Set()
+    })
+  }, [checkedSnapshot, onIncrement])
+
+  const toggleCheck = (id: string) => {
+    navigator.vibrate?.(10)
+    // Unchecking from erledigt: add to pendingUncheck with delay
+    if (checked.has(id)) {
+      if (pendingUncheck.has(id)) {
+        // Already pending uncheck — cancel it
+        setPendingUncheck((prev) => {
+          const next = new Set(prev)
+          next.delete(id)
+          return next
+        })
+        return
+      }
+      setPendingUncheck((prev) => new Set(prev).add(id))
+      if (uncheckTimer.current) clearTimeout(uncheckTimer.current)
+      uncheckTimer.current = setTimeout(flushPendingUncheck, 1500)
       return
     }
     // Checking: if already pending, just toggle it off from pending
@@ -342,7 +365,7 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFu
                   <ShoppingListItem
                     product={item.product}
                     quantity={item.qty}
-                    isChecked={true}
+                    isChecked={!pendingUncheck.has(item.id)}
                     note={notes[item.id]}
                     onToggle={() => toggleCheck(item.id)}
                     onDetail={() => setSelectedItemId(item.id)}
@@ -362,7 +385,7 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFu
       </div>
 
       {/* Add products button */}
-      {hasAnyItems && <div className="fixed bottom-20 left-0 right-0 flex justify-center z-40 pointer-events-none">
+      {hasAnyItems && <div className="fixed bottom-14 left-0 right-0 flex justify-center z-40 pointer-events-none">
         <div className="max-w-[428px] w-full flex justify-center px-4 mb-3 pointer-events-none">
           <button
             onClick={onAddProduct}

@@ -95,19 +95,30 @@ export const allProducts = new Map<string, Product>(
 )
 
 // Product ID → section title + icon for use in ListsPage
+// Map favorite products to their real categories
+const favoriteCategoryMap: Record<string, string> = {
+  '1': 'Brot & Backwaren',      // Blätterteig
+  '2': 'Getränke',               // Ketchup (Saucen — closest)
+  '4': 'Milchprodukte & Eier',   // Pouletbrust (Fleisch — closest)
+  '25': 'Getränke',              // Olivenöl (closest)
+  '28': 'Brot & Backwaren',      // Basmatireis (closest)
+  '43': 'Früchte & Gemüse',      // Konfitüre (closest)
+  '44': 'Milchprodukte & Eier',  // Zahnpasta (closest)
+}
+
 export const productSectionMap = new Map<string, string>()
 export const sectionIconMap = new Map<string, ComponentType<LucideProps>>()
-// Assign favorites to a general category
-for (const p of favoriteProducts) {
-  productSectionMap.set(p.id, 'Vorräte & Haushalt')
-}
-sectionIconMap.set('Vorräte & Haushalt', Heart)
+
 for (const section of categorySections) {
   sectionIconMap.set(section.title, section.icon)
   for (const p of section.products) {
-    if (!productSectionMap.has(p.id)) {
-      productSectionMap.set(p.id, section.title)
-    }
+    productSectionMap.set(p.id, section.title)
+  }
+}
+// Assign favorites to real categories
+for (const p of favoriteProducts) {
+  if (!productSectionMap.has(p.id)) {
+    productSectionMap.set(p.id, favoriteCategoryMap[p.id] || categorySections[0].title)
   }
 }
 
