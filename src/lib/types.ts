@@ -13,4 +13,10 @@ type Product = {
   discountPercent?: number
 }
 
-export type { PageName, Product }
+type ShoppingList = {
+  id: string
+  name: string
+  quantities: Record<string, number>
+}
+
+export type { PageName, Product, ShoppingList }

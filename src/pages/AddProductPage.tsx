@@ -262,7 +262,7 @@ function ProductCard({ product, quantity, onAdd, onIncrement, onRemove }: {
   onRemove: () => void
 }) {
   return (
-    <div className="flex items-stretch mx-4 my-1.5 bg-white rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.08)] border border-[var(--color-border)]/50 overflow-hidden">
+    <div className="flex items-stretch h-[110px] mx-4 my-1.5 bg-white rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.08)] border border-[var(--color-border)]/50 overflow-hidden">
       <div className="w-24 flex-shrink-0 bg-[#FAFAFA] flex items-center justify-center self-stretch">
         {product.imageUrl ? (
           <img src={product.imageUrl} alt="" className="w-20 h-20 object-contain" />
