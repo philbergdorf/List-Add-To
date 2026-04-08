@@ -1,11 +1,11 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
-import { ShoppingBasket, Plus, Circle, CircleCheckBig, ChevronDown, ChevronUp, ChevronRight, EllipsisVertical, UserPlus, Minus, Trash, Check } from 'lucide-react'
+import { ShoppingBasket, Plus, Circle, CircleCheckBig, ChevronDown, ChevronUp, ChevronRight, EllipsisVertical, UserPlus, Minus, Trash, Check, Pencil } from 'lucide-react'
 import { allProducts, productSectionMap, sectionIconMap, categorySections } from '@/pages/AddProductPage'
 import type { Product, ShoppingList } from '@/lib/types'
 
 const sectionOrder = categorySections.map((s) => s.title)
 
-function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFully, lists, activeListId, onSwitchList, displayListName }: {
+function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFully, lists, activeListId, onSwitchList, displayListName, listVersion }: {
   onAddProduct: () => void
   quantities: Record<string, number>
   onIncrement: (id: string) => void
@@ -15,6 +15,7 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFu
   activeListId: string
   onSwitchList: (id: string) => void
   displayListName: string
+  listVersion: 1 | 2
 }) {
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [pending, setPending] = useState<Set<string>>(new Set())
@@ -39,7 +40,8 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFu
     if (!el) return
     const onScroll = () => {
       const top = el.scrollTop
-      if (top > lastScrollTop.current + 5) setCollapsed(true)
+      if (top < 50) setCollapsed(false)
+      else if (top > lastScrollTop.current + 5) setCollapsed(true)
       else if (top < lastScrollTop.current - 5) setCollapsed(false)
       lastScrollTop.current = top
     }
@@ -317,15 +319,26 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFu
               <div className="mx-4 bg-white rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
                 {items.map((item, i) => (
                   <div key={item.id}>
-                    {i > 0 && <div className="border-t border-[var(--color-border)] ml-14" />}
-                    <ShoppingListItem
-                      product={item.product}
-                      quantity={item.qty}
-                      isChecked={pending.has(item.id)}
-                      note={notes[item.id]}
-                      onToggle={() => toggleCheck(item.id)}
-                      onDetail={() => setSelectedItemId(item.id)}
-                    />
+                    {i > 0 && <div className={`border-t border-[var(--color-border)] ${listVersion === 1 ? 'ml-14' : ''}`} />}
+                    {listVersion === 2 ? (
+                      <ShoppingListItemV2
+                        product={item.product}
+                        quantity={item.qty}
+                        isChecked={pending.has(item.id)}
+                        note={notes[item.id]}
+                        onToggle={() => toggleCheck(item.id)}
+                        onDetail={() => setSelectedItemId(item.id)}
+                      />
+                    ) : (
+                      <ShoppingListItem
+                        product={item.product}
+                        quantity={item.qty}
+                        isChecked={pending.has(item.id)}
+                        note={notes[item.id]}
+                        onToggle={() => toggleCheck(item.id)}
+                        onDetail={() => setSelectedItemId(item.id)}
+                      />
+                    )}
                   </div>
                 ))}
               </div>
@@ -362,14 +375,25 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFu
               {showErledigt && checkedItems.map((item) => (
                 <div key={item.id}>
                   <div className="border-t border-[var(--color-border)] ml-14" />
-                  <ShoppingListItem
-                    product={item.product}
-                    quantity={item.qty}
-                    isChecked={!pendingUncheck.has(item.id)}
-                    note={notes[item.id]}
-                    onToggle={() => toggleCheck(item.id)}
-                    onDetail={() => setSelectedItemId(item.id)}
-                  />
+                  {listVersion === 2 ? (
+                    <ShoppingListItemV2
+                      product={item.product}
+                      quantity={item.qty}
+                      isChecked={!pendingUncheck.has(item.id)}
+                      note={notes[item.id]}
+                      onToggle={() => toggleCheck(item.id)}
+                      onDetail={() => setSelectedItemId(item.id)}
+                    />
+                  ) : (
+                    <ShoppingListItem
+                      product={item.product}
+                      quantity={item.qty}
+                      isChecked={!pendingUncheck.has(item.id)}
+                      note={notes[item.id]}
+                      onToggle={() => toggleCheck(item.id)}
+                      onDetail={() => setSelectedItemId(item.id)}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -457,14 +481,14 @@ function ShoppingListItem({ product, quantity, isChecked, note, onToggle, onDeta
           {product.description}
         </p>
         {note ? (
-          <p className="text-[12px] text-[var(--color-text-secondary)] mt-0.5 truncate">{note}</p>
+          <p className="text-[12px] text-[var(--color-text)] mt-0.5 truncate">{note}</p>
         ) : (
           <p className="text-[12px] text-[var(--color-text-secondary)] mt-0.5">{product.unit}</p>
         )}
       </div>
 
       {quantity > 1 && (
-        <span className="text-[12px] font-semibold text-[var(--color-text-secondary)] bg-[var(--color-bg)] px-2 py-0.5 rounded-full flex-shrink-0">
+        <span className="text-[12px] font-semibold text-[var(--color-text)] bg-[var(--color-bg)] px-2 py-0.5 rounded-full flex-shrink-0">
           x{quantity}
         </span>
       )}
@@ -475,6 +499,60 @@ function ShoppingListItem({ product, quantity, isChecked, note, onToggle, onDeta
 
       <button onClick={onDetail} className="flex-shrink-0 bg-[#F2F2F7] px-1.5 py-2 rounded-lg text-[var(--color-text-secondary)] active:bg-[var(--color-border)] transition-colors">
         <EllipsisVertical size={18} />
+      </button>
+    </div>
+  )
+}
+
+function ShoppingListItemV2({ product, quantity, isChecked, note, onToggle, onDetail }: {
+  product: Product
+  quantity: number
+  isChecked: boolean
+  note?: string
+  onToggle: () => void
+  onDetail: () => void
+}) {
+  return (
+    <div className="flex items-stretch">
+      <div
+        className={`flex-1 flex items-center px-3 py-3.5 gap-3 cursor-pointer transition-all duration-300 ${isChecked ? 'opacity-50' : ''}`}
+        onClick={onToggle}
+      >
+        <div className="w-11 h-11 flex-shrink-0 rounded-lg overflow-hidden">
+          {product.imageUrl ? (
+            <img src={product.imageUrl} alt="" className="w-full h-full object-contain" />
+          ) : (
+            <div className="w-full h-full bg-[#E5E5EA]" />
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <p className={`text-[14px] font-medium leading-tight transition-all duration-300 ${isChecked ? 'line-through text-[var(--color-green)]' : 'text-[var(--color-text)]'}`}>
+            {product.description}
+          </p>
+          {note ? (
+            <p className="text-[12px] text-[var(--color-text)] mt-0.5 truncate">{note}</p>
+          ) : (
+            <p className="text-[12px] text-[var(--color-text-secondary)] mt-0.5">{product.unit}</p>
+          )}
+        </div>
+
+        {quantity > 1 && (
+          <span className="text-[12px] font-semibold text-[var(--color-text)] bg-[var(--color-bg)] px-2 py-0.5 rounded-full flex-shrink-0">
+            x{quantity}
+          </span>
+        )}
+
+        <span className={`text-[14px] font-bold flex-shrink-0 transition-all duration-300 ${isChecked ? 'line-through text-[var(--color-green)]' : 'text-[var(--color-text)]'}`}>
+          {(product.price * quantity).toFixed(2)}
+        </span>
+      </div>
+
+      <button
+        onClick={onDetail}
+        className="flex-shrink-0 w-12 flex items-center justify-center bg-[#FAFAFA] text-[var(--color-text-secondary)] active:bg-[var(--color-border)] transition-colors border-l border-[var(--color-border)]"
+      >
+        <Pencil size={16} />
       </button>
     </div>
   )

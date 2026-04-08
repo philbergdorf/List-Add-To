@@ -4,7 +4,7 @@ import HomePage from '@/pages/HomePage'
 import ListsPage from '@/pages/ListsPage'
 import AddProductPage from '@/pages/AddProductPage'
 import type { PageName, ShoppingList } from '@/lib/types'
-import { Percent, Barcode, ClipboardList, ShoppingCart, EllipsisVertical, Plus, Pencil, Trash2, Store, Truck } from 'lucide-react'
+import { Percent, Barcode, ClipboardList, ShoppingCart, EllipsisVertical, Plus, Pencil, Trash2, Store, Truck, Repeat } from 'lucide-react'
 
 function MigrosIcon() {
   return (
@@ -106,6 +106,14 @@ function Header({ title, onMenuAction, showShoppingToggle, canEditList = true, s
             >
               <Plus size={18} color="var(--color-text-secondary)" />
               Neue Liste
+            </button>
+            <div className="border-t border-[var(--color-border)]" />
+            <button
+              onClick={() => { setMenuOpen(false); onMenuAction('toggleVersion') }}
+              className="flex items-center gap-3 w-full px-4 py-3 text-left text-[15px] text-[var(--color-text)] active:bg-[var(--color-bg)]"
+            >
+              <Repeat size={18} color="var(--color-text-secondary)" />
+              Listenansicht wechseln
             </button>
             {canEditList && (
               <>
@@ -230,6 +238,7 @@ let nextListId = 2
 function ListAddToApp() {
   const [currentPage, setCurrentPage] = useState<PageName>('liste')
   const [shoppingMode, setShoppingMode] = useState<'laden' | 'online'>('laden')
+  const [listVersion, setListVersion] = useState<1 | 2>(1)
   const [lists, setLists] = useState<ShoppingList[]>([
     { id: '1', name: 'Einkaufsliste', quantities: {} }
   ])
@@ -276,6 +285,8 @@ function ListAddToApp() {
       setNameSheet({ mode: 'new', defaultName: `Einkaufsliste ${lists.length + 1}` })
     } else if (action === 'rename') {
       setNameSheet({ mode: 'rename' })
+    } else if (action === 'toggleVersion') {
+      setListVersion((v) => v === 1 ? 2 : 1)
     } else if (action === 'delete') {
       if (lists.length <= 1) return
       setLists((prev) => {
@@ -329,6 +340,7 @@ function ListAddToApp() {
                 lists={lists}
                 activeListId={activeListId}
                 displayListName={displayListName}
+                listVersion={listVersion}
                 onSwitchList={setActiveListId}
               />
             ) : (
