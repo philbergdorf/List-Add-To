@@ -238,7 +238,7 @@ let nextListId = 2
 function ListAddToApp() {
   const [currentPage, setCurrentPage] = useState<PageName>('liste')
   const [shoppingMode, setShoppingMode] = useState<'laden' | 'online'>('laden')
-  const [listVersion, setListVersion] = useState<1 | 2>(1)
+  const [listVersion, setListVersion] = useState<1 | 2>(2)
   const [lists, setLists] = useState<ShoppingList[]>([
     { id: '1', name: 'Einkaufsliste', quantities: {} }
   ])
