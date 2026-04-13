@@ -528,11 +528,9 @@ function ShoppingListItemV2({ product, quantity, isChecked, note, onToggle, onDe
           <p className={`text-[14px] font-medium leading-tight transition-all duration-300 ${isChecked ? 'line-through text-[var(--color-green)]' : 'text-[var(--color-text)]'}`}>
             {product.description}
           </p>
-          {note ? (
-            <p className="text-[12px] text-[var(--color-text)] mt-0.5 truncate">{note}</p>
-          ) : (
-            <p className="text-[12px] text-[var(--color-text-secondary)] mt-0.5">{product.unit}</p>
-          )}
+          <p className="text-[12px] text-[var(--color-text-secondary)] mt-0.5 truncate">
+            {product.unit}{note ? <> · <span className="text-[var(--color-text)]">{note}</span></> : ''}
+          </p>
         </div>
 
         {quantity > 1 && (
@@ -602,13 +600,23 @@ function ItemDetailSheet({ product, quantity, note, onClose, onNoteChange, onInc
           {/* Note */}
           <div className="px-5 py-4">
             <label className="text-[13px] font-bold text-[var(--color-text)] uppercase tracking-wide">Notiz</label>
-            <input
-              type="text"
-              value={note}
-              onChange={(e) => onNoteChange(e.target.value)}
-              placeholder="z.B. Bio, die grossen..."
-              className="w-full mt-2 px-3 py-2.5 bg-[var(--color-bg)] rounded-xl text-[15px] text-[var(--color-text)] placeholder-[var(--color-text-tertiary)] outline-none border border-[var(--color-border)] focus:border-[var(--color-primary)]"
-            />
+            <div className="relative flex items-center mt-2">
+              <input
+                type="text"
+                value={note}
+                onChange={(e) => onNoteChange(e.target.value)}
+                placeholder="z.B. Bio, die grossen..."
+                className="w-full px-3 py-2.5 pr-9 bg-[var(--color-bg)] rounded-xl text-[15px] text-[var(--color-text)] placeholder-[var(--color-text-tertiary)] outline-none border border-[var(--color-border)] focus:border-[var(--color-primary)]"
+              />
+              {note && (
+                <button
+                  onClick={() => onNoteChange('')}
+                  className="absolute right-2.5 w-5 h-5 bg-[var(--color-text-tertiary)] rounded-full flex items-center justify-center"
+                >
+                  <svg width="10" height="10" viewBox="0 0 10 10" stroke="white" strokeWidth="1.8" strokeLinecap="round"><line x1="2" y1="2" x2="8" y2="8" /><line x1="8" y1="2" x2="2" y2="8" /></svg>
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="border-t border-[var(--color-border)]" />
