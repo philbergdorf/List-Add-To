@@ -402,7 +402,7 @@ function ListsPage({ onAddProduct, quantities, onIncrement, onRemove, onRemoveFu
 
         {hasItems && !allDone && (
           <div className="mx-4 mt-4 mb-36 flex items-center justify-between bg-white rounded-xl px-4 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)] border border-[var(--color-border)]">
-            <span className="text-[14px] font-medium text-[var(--color-text-secondary)]">Gesamt</span>
+            <span className="text-[14px] font-bold text-[var(--color-text)]">Gesamt</span>
             <span className="text-[18px] font-bold text-[var(--color-text)]">CHF {totalPrice.toFixed(2)}</span>
           </div>
         )}
