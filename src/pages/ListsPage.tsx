@@ -480,11 +480,9 @@ function ShoppingListItem({ product, quantity, isChecked, note, onToggle, onDeta
         <p className={`text-[14px] font-medium leading-tight transition-all duration-300 ${isChecked ? 'line-through text-[var(--color-green)]' : 'text-[var(--color-text)]'}`}>
           {product.description}
         </p>
-        {note ? (
-          <p className="text-[12px] text-[var(--color-text)] mt-0.5 truncate">{note}</p>
-        ) : (
-          <p className="text-[12px] text-[var(--color-text-secondary)] mt-0.5">{product.unit}</p>
-        )}
+        <p className="text-[12px] text-[var(--color-text-secondary)] mt-0.5 truncate">
+          {product.unit}{note ? <> · <span className="text-[var(--color-text)]">{note}</span></> : ''}
+        </p>
       </div>
 
       {quantity > 1 && (
